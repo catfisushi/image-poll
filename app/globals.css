@@ -121,11 +121,20 @@ p {
   box-shadow: 0 0 0 3px rgba(38, 119, 216, 0.13);
 }
 
-.image-grid,
 .shared-image-grid {
+  width: 100%;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.option-editor {
+  margin-bottom: 24px;
+}
+
+.option-editor .text-field {
+  margin-bottom: 12px;
 }
 
 .image-field {
@@ -323,6 +332,8 @@ p {
 }
 
 .vote-option {
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   padding: 0;
   overflow: hidden;
@@ -376,14 +387,19 @@ p {
   position: absolute;
   top: 12px;
   left: 12px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
+  max-width: calc(100% - 104px);
+  min-height: 34px;
+  padding: 7px 10px;
+  display: block;
+  overflow: hidden;
   color: white;
   background: rgba(23, 25, 28, 0.86);
   border-radius: 6px;
+  font-size: 14px;
   font-weight: 800;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .selected-badge {
@@ -488,12 +504,8 @@ p {
     box-shadow: none;
   }
 
-  .image-grid {
-    gap: 10px;
-  }
-
   .image-picker {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
   }
 
   .share-header {
@@ -509,11 +521,64 @@ p {
   }
 
   .shared-image-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .vote-image img {
-    max-height: 72vh;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: none;
+    object-fit: contain;
+  }
+
+  .choice-label {
+    top: 8px;
+    left: 8px;
+    max-width: calc(100% - 72px);
+    min-height: 28px;
+    padding: 4px 7px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .selected-badge {
+    top: 8px;
+    right: 8px;
+    padding: 6px 7px;
+    font-size: 11px;
+  }
+
+  .vote-result {
+    padding: 10px 10px 8px;
+    font-size: 12px;
+  }
+
+  .vote-result strong {
+    font-size: 15px;
+  }
+
+  .result-track {
+    margin: 0 10px 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .share-content {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .shared-image-grid {
+    gap: 6px;
+  }
+
+  .choice-label {
+    max-width: calc(100% - 62px);
+  }
+
+  .selected-badge {
+    padding-right: 5px;
+    padding-left: 5px;
   }
 }

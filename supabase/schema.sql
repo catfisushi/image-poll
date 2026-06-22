@@ -3,6 +3,10 @@
 create table if not exists public.polls (
   id text primary key,
   title text not null check (char_length(title) between 1 and 60),
+  option_a_name text not null default 'A'
+    check (char_length(option_a_name) between 1 and 30),
+  option_b_name text not null default 'B'
+    check (char_length(option_b_name) between 1 and 30),
   option_a_label text not null default 'A',
   option_b_label text not null default 'B',
   image_a text not null,
@@ -14,6 +18,8 @@ create table if not exists public.polls (
 
 -- These ALTER statements make the file safe to run over the earlier MVP schema.
 alter table public.polls
+  add column if not exists option_a_name text not null default 'A',
+  add column if not exists option_b_name text not null default 'B',
   add column if not exists option_a_label text not null default 'A',
   add column if not exists option_b_label text not null default 'B',
   add column if not exists votes_a bigint not null default 0,

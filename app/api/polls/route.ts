@@ -12,11 +12,15 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       id?: string;
       title?: string;
+      optionAName?: string;
+      optionBName?: string;
       imageAPath?: string;
       imageBPath?: string;
     };
     const id = String(body.id || "");
-    const title = String(body.title || "").trim() || "你更喜欢哪一张？";
+    const title = String(body.title || "").trim() || "谁素攻？";
+    const optionAName = String(body.optionAName || "").trim() || "A";
+    const optionBName = String(body.optionBName || "").trim() || "B";
     const imageAPath = String(body.imageAPath || "");
     const imageBPath = String(body.imageBPath || "");
 
@@ -29,8 +33,21 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    if (optionAName.length > 30 || optionBName.length > 30) {
+      return NextResponse.json(
+        { error: "选项名称不能超过 30 个字符。" },
+        { status: 400 },
+      );
+    }
 
-    const poll = await createPoll({ id, title, imageAPath, imageBPath });
+    const poll = await createPoll({
+      id,
+      title,
+      optionAName,
+      optionBName,
+      imageAPath,
+      imageBPath,
+    });
     return NextResponse.json({ poll }, { status: 201 });
   } catch (error) {
     console.error("[poll-create]", error);

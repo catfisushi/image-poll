@@ -69,6 +69,8 @@ function ImageField({
 export default function Home() {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [optionAName, setOptionAName] = useState("");
+  const [optionBName, setOptionBName] = useState("");
   const [images, setImages] = useState<(SelectedImage | null)[]>([null, null]);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -187,6 +189,8 @@ export default function Home() {
         body: JSON.stringify({
           id: upload.id,
           title: title.trim(),
+          optionAName: optionAName.trim(),
+          optionBName: optionBName.trim(),
           imageAPath: upload.imageA.path,
           imageBPath: upload.imageB.path,
         }),
@@ -228,12 +232,22 @@ export default function Home() {
               type="text"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="例如：哪张更适合当头像？"
+              placeholder="不填写时默认：谁素攻？"
               maxLength={60}
             />
           </label>
 
-          <div className="image-grid">
+          <section className="option-editor">
+            <label className="text-field">
+              <span className="field-label">图片 A 名称</span>
+              <input
+                type="text"
+                value={optionAName}
+                onChange={(event) => setOptionAName(event.target.value)}
+                placeholder="不填写时默认：A"
+                maxLength={30}
+              />
+            </label>
             <ImageField
               inputId="image-a"
               label="图片 A"
@@ -241,6 +255,19 @@ export default function Home() {
               fileName={images[0]?.file.name}
               onChange={(event) => selectImage(0, event)}
             />
+          </section>
+
+          <section className="option-editor">
+            <label className="text-field">
+              <span className="field-label">图片 B 名称</span>
+              <input
+                type="text"
+                value={optionBName}
+                onChange={(event) => setOptionBName(event.target.value)}
+                placeholder="不填写时默认：B"
+                maxLength={30}
+              />
+            </label>
             <ImageField
               inputId="image-b"
               label="图片 B"
@@ -248,7 +275,7 @@ export default function Home() {
               fileName={images[1]?.file.name}
               onChange={(event) => selectImage(1, event)}
             />
-          </div>
+          </section>
 
           {error && <p className="error-message">{error}</p>}
 
@@ -258,7 +285,7 @@ export default function Home() {
         </form>
 
         <p className="storage-note">
-          创建后可复制链接分享；本地开发数据保存在项目目录中。
+          创建后可复制链接分享；图片和票数将保存到云端。
         </p>
       </section>
     </main>
