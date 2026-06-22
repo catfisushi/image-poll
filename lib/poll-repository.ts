@@ -149,6 +149,25 @@ export async function getPoll(id: string): Promise<Poll | null> {
   return data ? mapPoll(data as SupabasePollRow) : null;
 }
 
+export async function getVoterChoice(
+  pollId: string,
+  voterId: string,
+): Promise<VoteChoice | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("votes")
+    .select("choice")
+    .eq("poll_id", pollId)
+    .eq("voter_id", voterId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`读取访问者投票状态失败：${error.message}`);
+  }
+
+  return data ? (data.choice as VoteChoice) : null;
+}
+
 export async function castVote(
   id: string,
   choice: VoteChoice,

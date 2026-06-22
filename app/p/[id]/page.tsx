@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Poll, VoteChoice } from "@/lib/poll-types";
+import { Poll, PollViewerState, VoteChoice } from "@/lib/poll-types";
 
 const VOTER_ID_KEY = "image-poll-voter-id";
 
@@ -28,17 +28,22 @@ export default function SharePage() {
   const [error, setError] = useState("");
   const [isVoting, setIsVoting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isViewerStateLoaded, setIsViewerStateLoaded] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadPoll() {
       try {
-        const response = await fetch(`/api/polls/${params.id}`, {
-          signal: controller.signal,
-        });
+        const voterId = getVoterId();
+        const query = new URLSearchParams({ voterId });
+        const response = await fetch(
+          `/api/polls/${params.id}?${query.toString()}`,
+          { signal: controller.signal },
+        );
         const result = (await response.json()) as {
           poll?: Poll;
+          viewer?: PollViewerState;
           error?: string;
         };
 
@@ -51,12 +56,16 @@ export default function SharePage() {
         }
 
         setPoll(result.poll);
-        const previousChoice = localStorage.getItem(
-          voteStorageKey(params.id),
-        ) as VoteChoice | null;
-        if (previousChoice === "A" || previousChoice === "B") {
-          setSelectedChoice(previousChoice);
-          setMessage(`你已投给图片 ${previousChoice}`);
+        const viewerChoice = result.viewer?.choice ?? null;
+        setSelectedChoice(viewerChoice);
+        setIsViewerStateLoaded(true);
+
+        if (viewerChoice) {
+          localStorage.setItem(voteStorageKey(params.id), viewerChoice);
+          setMessage(`你已投给图片 ${viewerChoice}`);
+        } else {
+          localStorage.removeItem(voteStorageKey(params.id));
+          setMessage("");
         }
       } catch (reason) {
         if ((reason as Error).name === "AbortError") return;
@@ -81,7 +90,7 @@ export default function SharePage() {
   }, [poll]);
 
   async function handleVote(choice: VoteChoice) {
-    if (!poll || isVoting) return;
+    if (!poll || !isViewerStateLoaded || isVoting) return;
 
     if (selectedChoice) {
       setMessage(`你已经投过图片 ${selectedChoice}，不能重复投票。`);
@@ -189,8 +198,11 @@ export default function SharePage() {
             image={poll.imageA}
             votes={poll.votesA}
             percent={results.percentA}
+            showResults={Boolean(selectedChoice)}
             selected={selectedChoice === "A"}
-            disabled={Boolean(selectedChoice) || isVoting}
+            disabled={
+              !isViewerStateLoaded || Boolean(selectedChoice) || isVoting
+            }
             onVote={handleVote}
           />
           <VoteOption
@@ -199,8 +211,11 @@ export default function SharePage() {
             image={poll.imageB}
             votes={poll.votesB}
             percent={results.percentB}
+            showResults={Boolean(selectedChoice)}
             selected={selectedChoice === "B"}
-            disabled={Boolean(selectedChoice) || isVoting}
+            disabled={
+              !isViewerStateLoaded || Boolean(selectedChoice) || isVoting
+            }
             onVote={handleVote}
           />
         </div>
@@ -208,7 +223,11 @@ export default function SharePage() {
         <div className="poll-feedback" aria-live="polite">
           {message && <p className="success-message">{message}</p>}
           {error && <p className="error-message">{error}</p>}
-          <p className="vote-total">共 {results.total} 票</p>
+          {selectedChoice ? (
+            <p className="vote-total">共 {results.total} 票</p>
+          ) : (
+            <p className="vote-total">点击一张图片投票后查看结果</p>
+          )}
         </div>
       </section>
     </main>
@@ -221,6 +240,7 @@ type VoteOptionProps = {
   image: string;
   votes: number;
   percent: number;
+  showResults: boolean;
   selected: boolean;
   disabled: boolean;
   onVote: (choice: VoteChoice) => void;
@@ -232,6 +252,7 @@ function VoteOption({
   image,
   votes,
   percent,
+  showResults,
   selected,
   disabled,
   onVote,
@@ -250,13 +271,17 @@ function VoteOption({
         <span className="choice-label">{label}</span>
         {selected && <span className="selected-badge">已选择</span>}
       </span>
-      <span className="vote-result">
-        <span>{votes} 票</span>
-        <strong>{percent}%</strong>
-      </span>
-      <span className="result-track">
-        <span style={{ width: `${percent}%` }} />
-      </span>
+      {showResults && (
+        <>
+          <span className="vote-result">
+            <span>{votes} 票</span>
+            <strong>{percent}%</strong>
+          </span>
+          <span className="result-track">
+            <span style={{ width: `${percent}%` }} />
+          </span>
+        </>
+      )}
     </button>
   );
 }

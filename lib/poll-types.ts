@@ -11,3 +11,7 @@ export type Poll = {
   votesB: number;
   createdAt: string;
 };
+
+export type PollViewerState = {
+  choice: VoteChoice | null;
+};
