@@ -21,6 +21,17 @@ function voteStorageKey(pollId: string) {
   return `image-poll-vote:${pollId}`;
 }
 
+function getChoiceName(poll: Poll, choice: VoteChoice) {
+  const label = choice === "A" ? poll.labelA : poll.labelB;
+  const trimmedLabel = label?.trim();
+
+  if (!trimmedLabel || trimmedLabel === choice) {
+    return `图片 ${choice}`;
+  }
+
+  return trimmedLabel;
+}
+
 export default function SharePage() {
   const params = useParams<{ id: string }>();
   const [poll, setPoll] = useState<Poll | null>();
@@ -63,7 +74,7 @@ export default function SharePage() {
 
         if (viewerChoice) {
           localStorage.setItem(voteStorageKey(params.id), viewerChoice);
-          setMessage(`你已投给图片 ${viewerChoice}`);
+          setMessage(`你已投给${getChoiceName(result.poll, viewerChoice)}`);
         } else {
           localStorage.removeItem(voteStorageKey(params.id));
           setMessage("");
@@ -94,7 +105,9 @@ export default function SharePage() {
     if (!poll || !isViewerStateLoaded || isVoting) return;
 
     if (selectedChoice) {
-      setMessage(`你已经投过图片 ${selectedChoice}，不能重复投票。`);
+      setMessage(
+        `你已经投过${getChoiceName(poll, selectedChoice)}，不能重复投票。`,
+      );
       return;
     }
 
@@ -125,10 +138,11 @@ export default function SharePage() {
       setPoll(result.poll);
       setSelectedChoice(result.choice);
       localStorage.setItem(voteStorageKey(poll.id), result.choice);
+      const choiceName = getChoiceName(result.poll, result.choice);
       setMessage(
         result.duplicate
-          ? `你已经投过图片 ${result.choice}。`
-          : `投票成功，你选择了图片 ${result.choice}！`,
+          ? `你已经投过${choiceName}。`
+          : `投票成功，你选择了${choiceName}！`,
       );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "投票失败");
@@ -180,17 +194,12 @@ export default function SharePage() {
           <span className="brand-mark">AB</span>
           <span>图片二选一</span>
         </Link>
-        <Link className="new-link" href="/">
-          新建
-        </Link>
       </header>
 
       <section className="share-content">
         <div className="poll-heading">
           <h1>{poll.title}</h1>
-          <button className="copy-button" type="button" onClick={copyShareLink}>
-            {isCopied ? "已复制" : "复制分享链接"}
-          </button>
+          <p>请选择一张图片投票</p>
         </div>
 
         <div className="shared-image-grid">
@@ -225,11 +234,20 @@ export default function SharePage() {
         <div className="poll-feedback" aria-live="polite">
           {message && <p className="success-message">{message}</p>}
           {error && <p className="error-message">{error}</p>}
-          {selectedChoice ? (
-            <p className="vote-total">共 {results.total} 票</p>
-          ) : (
-            <p className="vote-total">点击一张图片投票后查看结果</p>
-          )}
+          <p className="vote-total">已有 {results.total} 人参与投票</p>
+        </div>
+
+        <div className="poll-actions">
+          <button
+            className="poll-action poll-action-primary"
+            type="button"
+            onClick={copyShareLink}
+          >
+            {isCopied ? "已复制分享链接" : "复制分享链接"}
+          </button>
+          <Link className="poll-action poll-action-secondary" href="/">
+            创建新投票
+          </Link>
         </div>
       </section>
     </main>
