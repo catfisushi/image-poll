@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Poll, PollViewerState, VoteChoice } from "@/lib/poll-types";
+import { PageViewTracker } from "@/app/components/page-view-tracker";
 
 const VOTER_ID_KEY = "image-poll-voter-id";
 
@@ -173,6 +174,7 @@ export default function SharePage() {
 
   return (
     <main className="share-shell">
+      <PageViewTracker pathname={`/p/${params.id}`} />
       <header className="share-header">
         <Link className="brand-link" href="/">
           <span className="brand-mark">AB</span>

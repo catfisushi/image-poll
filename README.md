@@ -198,6 +198,35 @@ window.location.origin + "/p/" + pollId
 数据库通过 `(poll_id, voter_id)` 唯一约束再次防止重复计票。清除浏览器数据会
 生成新的匿名 ID，因此它不是登录级别的强防刷机制。
 
+## 简单数据后台
+
+后台地址：
+
+```text
+/admin
+```
+
+使用前需要：
+
+1. 在 Supabase SQL Editor 执行：
+   `supabase/migrations/20260622_add_page_views.sql`
+2. 在本地 `.env.local` 和 Vercel Environment Variables 添加：
+
+```text
+ADMIN_PASSWORD=一个足够长且唯一的后台密码
+```
+
+后台提供：
+
+- 总投票项目数
+- 总投票次数
+- 总访问次数
+- 今日访问次数（按中国标准时间计算）
+- 最近 10 个投票及分享链接
+
+首页和有效投票详情页每次打开会向 `page_views` 插入一条记录。后台登录成功后
+使用 12 小时有效的 HttpOnly cookie 保存会话，页面每 60 秒刷新一次统计。
+
 ## 官方参考
 
 - [Supabase Storage Buckets](https://supabase.com/docs/guides/storage/buckets/fundamentals)

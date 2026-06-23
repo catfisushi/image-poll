@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { compressImageFile } from "@/lib/image-client";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
+import { PageViewTracker } from "@/app/components/page-view-tracker";
 
 type SelectedImage = {
   file: File;
@@ -216,6 +217,7 @@ export default function Home() {
 
   return (
     <main className="page-shell">
+      <PageViewTracker pathname="/" />
       <section className="create-panel">
         <header className="page-header">
           <span className="brand-mark">AB</span>
